@@ -49,7 +49,7 @@ def polyd_to_s3(community, redis, consumer_name, access_key, secret_key, bucket,
         logger.setLevel(l.WARN)
 
     # for now, we don't send these to 'all' which is really the websocket events
-    producers = {c: producer.EventProducer(f'polyd-{c}-downloaded', db) for c in communities}
+    producers = {c: producer.EventProducer(f'polyd-{c}-downloaded', db, max_len=20000) for c in communities}
     executor = thread.BoundedExecutor(100, 16)
 
     for event in c.iter_events():
