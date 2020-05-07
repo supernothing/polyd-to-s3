@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 import boto3
@@ -13,7 +14,7 @@ def get_client(access_key, secret_key, endpoint, region):
     return session.client('s3')
 
 
-def event_to_s3(event, bucket, key, client, producer=None, session=None, expires=None):
+def event_to_s3(event, bucket, key, client, producer=None, session=None, expires=0):
     if not session:
         session = requests.Session()
 
@@ -26,6 +27,10 @@ def event_to_s3(event, bucket, key, client, producer=None, session=None, expires
     try:
         with session.get(url, stream=True) as r:
             r.raise_for_status()
+            if expires:
+                expires = datetime.datetime.now() + datetime.timedelta(minutes=expires)
+            else:
+                expires = None
             client.upload_fileobj(r.raw, Bucket=bucket, Key=key, ExtraArgs={'Expires': expires})
         logger.info('Downloaded %s.', url)
         if producer:

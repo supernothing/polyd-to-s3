@@ -58,7 +58,6 @@ def polyd_to_s3(community, redis, consumer_name, access_key, secret_key, bucket,
         for event in c.iter_events():
             logger.info('Processing: %s', event)
             client = transfer.get_client(access_key, secret_key, endpoint, region)
-            expiry = datetime.datetime.now() + datetime.timedelta(minutes=expires)
             key = event.uri
             executor.submit(transfer.event_to_s3, event, bucket, key,
-                            client, producers[event.community], session, expiry)
+                            client, producers[event.community], session, expires=expires)
