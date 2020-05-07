@@ -35,7 +35,7 @@ def event_to_s3(event, bucket, key, client, producer=None, session=None, expires
         logger.info('Downloaded %s.', url)
         if producer:
             new_url = f'{bucket}/{key}'
-            file_event = events.FileDownloaded(event.community, new_url, event)
+            file_event = events.FileDownloaded.from_path(event.community, new_url, event)
             producer.add_event(file_event)
 
         event.ack()

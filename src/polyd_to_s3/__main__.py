@@ -1,4 +1,3 @@
-import datetime
 import socket
 from concurrent.futures import ThreadPoolExecutor
 
@@ -11,7 +10,6 @@ from polyd_events import consumer, producer
 from polyd_events import communities as polyd_communities
 
 from . import transfer, logging
-
 
 
 @click.command()
