@@ -26,7 +26,7 @@ def event_to_s3(event, bucket, key, client, producer=None, session=None, expires
     try:
         with session.get(url, stream=True) as r:
             r.raise_for_status()
-            client.upload_fileobj(r.raw, Bucket=bucket, Key=key)
+            client.upload_fileobj(r.raw, Bucket=bucket, Key=key, ExtraArgs={'Expires': expires})
         logger.info('Downloaded %s.', url)
         if producer:
             new_url = f'{bucket}/{key}'
