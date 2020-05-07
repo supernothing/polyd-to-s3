@@ -10,8 +10,8 @@ logger = logging.get_logger()
 
 
 def get_client(access_key, secret_key, endpoint, region):
-    session = boto3.session.Session(access_key, secret_key)
-    return session.client('s3')
+    session = boto3.session.Session(access_key, secret_key, region_name=region)
+    return session.client('s3', endpoint_url=endpoint)
 
 
 def event_to_s3(event, bucket, key, client, producer=None, session=None, expires=0):
