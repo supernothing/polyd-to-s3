@@ -1,5 +1,4 @@
 import socket
-from concurrent.futures import ThreadPoolExecutor
 
 import click
 import requests
@@ -9,7 +8,7 @@ from walrus import Database
 from polyd_events import consumer, producer
 from polyd_events import communities as polyd_communities
 
-from . import transfer, logging
+from . import transfer, logging, thread
 
 
 @click.command()
@@ -51,14 +50,17 @@ def polyd_to_s3(community, redis, consumer_name, access_key, secret_key, bucket,
 
     # for now, we don't send these to 'all' which is really the websocket events
     producers = {c: producer.EventProducer(f'polyd-{c}-downloaded', db) for c in communities}
+    executor = thread.BoundedExecutor(100, 16)
 
-    with ThreadPoolExecutor() as executor:
-        for event in c.iter_events():
-            logger.info('Processing: %s', event)
-            # only process FILE artifacts
-            if event.artifact_type != 'FILE':
-                continue
-            client = transfer.get_client(access_key, secret_key, endpoint, region)
-            key = event.uri
-            executor.submit(transfer.event_to_s3, event, bucket, key,
-                            client, producers[event.community], session, expires=expires)
+    for event in c.iter_events():
+        logger.info('Processing: %s', event)
+        # only process FILE artifacts
+        if event.artifact_type != 'FILE':
+            continue
+        client = transfer.get_client(access_key, secret_key, endpoint, region)
+        key = event.uri
+        executor.submit(transfer.event_to_s3, event, bucket, key,
+                        client, producers[event.community], session, expires=expires)
+
+    executor.shutdown()
+
