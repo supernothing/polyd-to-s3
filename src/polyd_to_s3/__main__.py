@@ -57,6 +57,9 @@ def polyd_to_s3(community, redis, consumer_name, access_key, secret_key, bucket,
     with ThreadPoolExecutor() as executor:
         for event in c.iter_events():
             logger.info('Processing: %s', event)
+            # only process FILE artifacts
+            if event.artifact_type != 'FILE':
+                continue
             client = transfer.get_client(access_key, secret_key, endpoint, region)
             key = event.uri
             executor.submit(transfer.event_to_s3, event, bucket, key,
