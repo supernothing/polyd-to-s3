@@ -19,8 +19,9 @@ def event_to_s3(event, bucket, key, client, producer=None, session=None, expires
 
     # eventually, would be good to use libpolyd here
     # for now, let's just do this manually
+    # assumes one bounty / one file, which should always be the case now
 
-    url = f'https://{event.community}.k.polyswarm.network/v1/artifacts/{event.uri}'
+    url = f'https://{event.community}.k.polyswarm.network/v1/artifacts/{event.uri}/0'
     logger.info('Downloading %s', url)
     try:
         with session.get(url, stream=True) as r:
