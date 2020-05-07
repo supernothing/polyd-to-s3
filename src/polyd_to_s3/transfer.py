@@ -22,13 +22,16 @@ def event_to_s3(event, bucket, key, client, producer=None, session=None, expires
 
     url = f'https://{event.community}.k.polyswarm.network/v1/artifacts/{event.uri}'
     logger.info('Downloading %s', url)
-    with session.get(url, stream=True) as r:
-        r.raise_for_status()
-        client.put_object(Bucket=bucket, Key=key, Body=r.raw)
-    logger.info('Downloaded %s.', url)
-    if producer:
-        url = f'{bucket}/{key}'
-        file_event = events.FileDownloaded(event.community, url, event)
-        producer.add_event(file_event)
+    try:
+        with session.get(url, stream=True) as r:
+            r.raise_for_status()
+            client.put_object(Bucket=bucket, Key=key, Body=r.raw)
+        logger.info('Downloaded %s.', url)
+        if producer:
+            new_url = f'{bucket}/{key}'
+            file_event = events.FileDownloaded(event.community, new_url, event)
+            producer.add_event(file_event)
 
-    event.ack()
+        event.ack()
+    except Exception as e:
+        logger.exception('Error downloading %s: %s', url, e)     
