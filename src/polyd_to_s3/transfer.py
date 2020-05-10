@@ -31,7 +31,7 @@ def event_to_s3(event, bucket, key, client, producer=None, session=None, expires
                 expires = datetime.datetime.now() + datetime.timedelta(minutes=expires)
             else:
                 expires = None
-            client.upload_fileobj(r.raw, Bucket=bucket, Key=key, ExtraArgs={'Expires': expires})
+            client.upload_fileobj(r.raw, Bucket=bucket, Key=key, ExtraArgs={'Expires': expires, 'ContentEncoding': 'gzip'})
         logger.info('Downloaded %s.', url)
         if producer:
             new_url = f'{bucket}/{key}'
