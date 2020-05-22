@@ -40,7 +40,7 @@ def polyd_to_s3(community, redis, consumer_name, access_key, secret_key, bucket,
 
     streams = [f'polyd-{c}-bounty' for c in communities]
 
-    c = consumer.EventConsumer(streams, 'polyd_to_s3', consumer_name, db)
+    c = consumer.EventConsumer(streams, 'polyd_to_s3', consumer_name, db, consume_from_end=True)
 
     logger = logging.get_logger()
 
